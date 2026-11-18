@@ -1,0 +1,25 @@
+{
+  "name": "assimilacao-rpg-dice-bot",
+  "version": "1.0.0",
+  "description": "Bot de Discord para Assimilação RPG com ícones oficiais, mecânicas de Roll & Keep e Components v2",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "keywords": [
+    "discord",
+    "rpg",
+    "assimilacao-rpg",
+    "dice-roller",
+    "components-v2"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@napi-rs/canvas": "^1.1.1",
+    "discord.js": "^14.28.1",
+    "dotenv": "^16.4.7"
+  }
+}
