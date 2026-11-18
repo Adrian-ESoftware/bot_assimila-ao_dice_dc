@@ -172,7 +172,7 @@ function parseMessageCommand(content, options = {}) {
   const tokens = body.split(/\s+/).filter(Boolean);
   if (tokens.length === 0) return null;
 
-  // Verifica comandos de texto com prefixo sem exigir sufixo "a"
+  // Verifica comandos especiais com prefixo (ex: "!ajuda", "!tabela", "!assimilacao 3")
   const firstLower = tokens[0].toLowerCase();
   if (hasPrefix) {
     if (['ajuda', 'help', 'comandos', 'h'].includes(firstLower) && tokens.length === 1) {
@@ -185,49 +185,13 @@ function parseMessageCommand(content, options = {}) {
       return { type: 'help', topic: 'rules' };
     }
     if (firstLower === 'tabela') {
-      const rest = tokens.filter((t, idx) => idx > 0 && t.toLowerCase() !== 'a');
+      const rest = tokens.slice(1);
       const sides = rest.some((t) => t.includes('12')) ? 12 : 10;
       return { type: 'table', sides, label };
     }
     if (firstLower === 'assimilacao' || firstLower === 'assimilação') {
-      const rest = tokens.filter((t, idx) => idx > 0 && t.toLowerCase() !== 'a');
+      const rest = tokens.slice(1);
       const level = rest[0] && /^\d+$/.test(rest[0]) ? parseInt(rest[0], 10) : 1;
-      if (level < 0 || level > 10) {
-        return { type: 'error', message: 'O Nível de Assimilação deve estar entre **0 e 10**.' };
-      }
-      const totalD12 = 1 + 2 * level;
-      return {
-        type: 'roll',
-        pool: { d6: 0, d10: 0, d12: totalD12 },
-        mode: 'assimilation_test',
-        keepAll: true,
-        keepCount: totalD12,
-        assimilationLevel: level,
-        label: label || `Teste de Assimilação (Nível ${level})`,
-      };
-    }
-  }
-
-  // Verifica chamadas especiais terminadas com sufixo "a" (ex: "ajuda a", "tabela a", "assimilacao 3 a")
-  const lastLower = tokens[tokens.length - 1].toLowerCase();
-  if (lastLower === 'a' && tokens.length >= 2) {
-    const head = tokens[0].toLowerCase();
-    const middle = tokens.slice(1, -1);
-    if (['ajuda', 'help', 'comandos'].includes(head) && middle.length === 0) {
-      return { type: 'help', topic: 'overview' };
-    }
-    if (['simbolos', 'símbolos', 'icones', 'ícones'].includes(head) && middle.length === 0) {
-      return { type: 'help', topic: 'symbols' };
-    }
-    if (['regras', 'mecanicas', 'mecânicas'].includes(head) && middle.length === 0) {
-      return { type: 'help', topic: 'rules' };
-    }
-    if (head === 'tabela' && middle.length <= 1) {
-      const sides = middle[0] && middle[0].includes('12') ? 12 : 10;
-      return { type: 'table', sides, label };
-    }
-    if ((head === 'assimilacao' || head === 'assimilação') && middle.length <= 1) {
-      const level = middle[0] && /^\d+$/.test(middle[0]) ? parseInt(middle[0], 10) : 1;
       if (level < 0 || level > 10) {
         return { type: 'error', message: 'O Nível de Assimilação deve estar entre **0 e 10**.' };
       }
@@ -250,55 +214,34 @@ function parseMessageCommand(content, options = {}) {
     workingBody = workingBody.replace(/^(?:r|roll|rolar)\s+/i, '').trim();
   }
 
-  // Procura o sufixo "a" (separado: "3d6 a", "3d6 + 2d10 a m2" ou colado: "3d6a", "d12a")
-  // Padrão 1: <dados> + espaço + "a" + (opcionalmente apenas flags válidas)
-  // Padrão 2: <dados>"a" colado no último termo de dado + (opcionalmente flags)
-  let dicePart = '';
-  let flagTokens = [];
-  let foundSuffixA = false;
-
+  // Agrupa todos os termos de dado contíguos no início (ex: "3d6a", "d12a", "3d6+2d10a", "3d6 + 2d10a", "3d6a + 2d10a")
+  // Exige que o último termo de dado termine com o sufixo "a" JUNTO (não aceita "3d6 a" separado por espaço).
   const workingTokens = workingBody.split(/\s+/).filter(Boolean);
-  const suffixIdx = workingTokens.findIndex((tok) => tok.toLowerCase() === 'a');
-
-  if (suffixIdx > 0) {
-    dicePart = workingTokens.slice(0, suffixIdx).join(' ');
-    flagTokens = workingTokens.slice(suffixIdx + 1);
-    foundSuffixA = true;
-  } else {
-    // Tenta sufixo "a" colado no último token de dado (ex: "3d6a", "d12a", "2d6+1d10a")
-    for (let i = 0; i < workingTokens.length; i += 1) {
-      const tok = workingTokens[i];
-      if (/^(?:\d*d\d+(?:\+\d*d\d+)*)a$/i.test(tok)) {
-        const before = workingTokens.slice(0, i);
-        const trimmedTok = tok.slice(0, -1);
-        dicePart = [...before, trimmedTok].join(' ');
-        flagTokens = workingTokens.slice(i + 1);
-        foundSuffixA = true;
-        break;
-      }
-    }
+  let splitAt = 0;
+  while (
+    splitAt < workingTokens.length &&
+    /^(?:\+|\d*d\d+a?(?:\+\d*d\d+a?)*)$/i.test(workingTokens[splitAt])
+  ) {
+    splitAt += 1;
   }
 
-  // Se não achou sufixo "a": só aceita se veio com prefixo explícito (ex: "!3d6", "!d12")
-  if (!foundSuffixA) {
-    if (!hasPrefix) return null;
-    // Separa tokens de dado no início e flags no final
-    let splitAt = 0;
-    while (
-      splitAt < workingTokens.length &&
-      /^(?:\+|\d*d\d+(?:\+\d*d\d+)*)$/i.test(workingTokens[splitAt])
-    ) {
-      splitAt += 1;
-    }
-    if (splitAt === 0) return null;
-    dicePart = workingTokens.slice(0, splitAt).join(' ');
-    flagTokens = workingTokens.slice(splitAt);
-  }
+  if (splitAt === 0) return null;
 
-  // Se foi chamado sem prefixo, garante que após o "a" existam apenas flags válidas
-  if (!hasPrefix && !isValidFlagSequence(flagTokens)) {
+  const rawDiceTokens = workingTokens.slice(0, splitAt);
+  const flagTokens = workingTokens.slice(splitAt);
+  const lastDiceToken = [...rawDiceTokens].reverse().find((t) => t !== '+');
+  if (!lastDiceToken) return null;
+
+  const foundSuffixA = lastDiceToken.toLowerCase().endsWith('a');
+
+  // Sem prefixo: exige obrigatoriamente o sufixo "a" colado no último termo de dado e apenas flags válidas depois
+  if (!hasPrefix && (!foundSuffixA || !isValidFlagSequence(flagTokens))) {
     return null;
   }
+
+  const dicePart = rawDiceTokens
+    .map((t) => t.replace(/(\d*d\d+)a\b/gi, '$1'))
+    .join(' ');
 
   const parsedDice = parseDiceTerms(dicePart);
   if (!parsedDice) return null;

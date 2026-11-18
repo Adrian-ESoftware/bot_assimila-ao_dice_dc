@@ -48,7 +48,17 @@ async function main() {
     }
   });
 
-  await client.login(config.token);
+  try {
+    await client.login(config.token);
+  } catch (err) {
+    if (String(err?.message || '').includes('Used disallowed intents')) {
+      console.error(
+        '[Erro de Intent] O "Message Content Intent" não está ativado no Discord Developer Portal.\n' +
+        'Acesse https://discord.com/developers/applications -> seu app -> Bot -> Privileged Gateway Intents -> ative "MESSAGE CONTENT INTENT" e salve.'
+      );
+    }
+    throw err;
+  }
 }
 
 if (require.main === module) {

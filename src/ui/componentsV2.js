@@ -301,17 +301,17 @@ function buildHelpPayload(topic, emojiMgr, prefix = '!') {
     ].join('\n');
   } else {
     bodyText = [
-      `### Como Rolar (Sufixo \`a\` ou Prefixo \`${prefix}\`)`,
-      `• \`3d6 a\` ou \`${prefix}3d6 a\` — Rola 3 dados de Instinto (${eD6}) e mantém o melhor.`,
-      `• \`d12 a\` ou \`${prefix}d12 a\` — Rola 1 dado Assimilado (${eD12}).`,
-      `• \`3d6 + 2d10 a\` — Junta Instinto + Conhecimento/Prática e mantém o melhor dado.`,
-      `• \`3d6 2d10 a m2\` — Mantém **2 dados** (ex: Empenho ou Origem).`,
-      `• \`3d6 2d10 a instinto\` — Já rola como **Rolagem Assimilada** (tudo ${eD12}, +1 mantido).`,
-      `• \`3d10 a dano\` — **Rolagem de Dano** (mantém todos; cada símbolo vale 1 de dano).`,
-      `• \`2d6+1d10+1d12 a conflito\` — **Modo Assimilador/Conflito** (mantém todos os dados).`,
-      `• \`assimilacao 3 a\` — **Teste de Assimilação** (\`1 + 2×Nível\` em ${eD12}, alerta de 10 Pressões).`,
-      `• \`tabela a\` / \`tabela 12 a\` — Sorteia **Linha × Coluna (6×6)** (pág. 277).`,
-      `• Adicione \`#descrição\` no fim para nomear o teste (ex: \`3d6 1d10 a #Percepção + Erudição\`).`,
+      `### Como Rolar (Sufixo \`a\` junto ou Prefixo \`${prefix}\`)`,
+      `• \`3d6a\` ou \`${prefix}3d6a\` — Rola 3 dados de Instinto (${eD6}) e mantém o melhor.`,
+      `• \`d12a\` ou \`${prefix}d12a\` — Rola 1 dado Assimilado (${eD12}).`,
+      `• \`3d6+2d10a\` ou \`3d6 + 2d10a\` — Junta Instinto + Conhecimento/Prática e mantém o melhor dado.`,
+      `• \`3d6+2d10a m2\` — Mantém **2 dados** (ex: Empenho ou Origem).`,
+      `• \`3d6+2d10a instinto\` — Já rola como **Rolagem Assimilada** (tudo ${eD12}, +1 mantido).`,
+      `• \`3d10a dano\` — **Rolagem de Dano** (mantém todos; cada símbolo vale 1 de dano).`,
+      `• \`2d6+1d10+1d12a conflito\` — **Modo Assimilador/Conflito** (mantém todos os dados).`,
+      `• \`${prefix}assimilacao 3\` — **Teste de Assimilação** (\`1 + 2×Nível\` em ${eD12}, alerta de 10 Pressões).`,
+      `• \`${prefix}tabela\` / \`${prefix}tabela 12\` — Sorteia **Linha × Coluna (6×6)** (pág. 277).`,
+      `• Adicione \`#descrição\` no fim para nomear o teste (ex: \`3d6+1d10a #Percepção + Erudição\`).`,
     ].join('\n');
   }
 
@@ -369,7 +369,7 @@ function buildErrorPayload(message) {
   const container = new ContainerBuilder()
     .setAccentColor(0xef4444)
     .addTextDisplayComponents(
-      new TextDisplayBuilder().setContent(`### ⚠️ Comando Inválido\n${message}\n\n*Exemplo válido:* \`3d6 a\`, \`d12 a\`, \`3d6 + 2d10 a\` ou \`ajuda a\`.`)
+      new TextDisplayBuilder().setContent(`### ⚠️ Comando Inválido\n${message}\n\n*Exemplo válido:* \`3d6a\`, \`d12a\`, \`3d6+2d10a\` ou \`!ajuda\`.`)
     );
 
   return {

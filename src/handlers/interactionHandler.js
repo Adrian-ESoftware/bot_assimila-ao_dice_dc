@@ -36,7 +36,7 @@ async function handleInteractionCreate(interaction, { rollStore, emojiMgr }) {
   const session = rollStore.get(target);
   if (!session) {
     await interaction.reply(
-      buildEphemeralNotice('⏳ Esta sessão de rolagem expirou. Faça uma nova rolagem (ex: `3d6 a` ou `d12 a`).')
+      buildEphemeralNotice('⏳ Esta sessão de rolagem expirou. Faça uma nova rolagem (ex: `3d6a` ou `d12a`).')
     );
     return;
   }

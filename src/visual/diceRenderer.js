@@ -1,5 +1,5 @@
 const { createCanvas } = require('@napi-rs/canvas');
-const { ensureFontRegistered, drawCenteredGlyph, FONT_FAMILY } = require('./iconAssets');
+const { ensureFontRegistered, drawCenteredGlyph, UI_FONT_FAMILY } = require('./iconAssets');
 
 const THEME = {
   bgTop: '#14171D',
@@ -71,20 +71,20 @@ function drawDieCard(ctx, die, x, y, w, h, isKept, rollMode) {
   const dieMeta = THEME.diceColors[die.sides] || THEME.diceColors[6];
   drawCenteredGlyph(ctx, dieMeta.glyph, x + 22, y + 20, 18, dieMeta.color, '#090B0E', 2);
 
-  ctx.font = '700 13px sans-serif';
+  ctx.font = `bold 13px "${UI_FONT_FAMILY}"`;
   ctx.fillStyle = dieMeta.color;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
   ctx.fillText(dieMeta.label, x + 35, y + 20);
 
   // Número correspondente da face (Tabela pág. 43) no canto direito
-  ctx.font = '600 12px sans-serif';
+  ctx.font = `bold 12px "${UI_FONT_FAMILY}"`;
   ctx.fillStyle = THEME.textMuted;
   ctx.textAlign = 'right';
   ctx.fillText(`#${die.faceNumber}`, x + w - 12, y + 20);
 
   // Índice #1, #2... no canto esquerdo inferior acima do badge
-  ctx.font = '600 11px sans-serif';
+  ctx.font = `normal 11px "${UI_FONT_FAMILY}"`;
   ctx.fillStyle = '#6B7280';
   ctx.textAlign = 'left';
   ctx.fillText(`Dado ${die.index + 1}`, x + 12, y + h - 18);
@@ -95,13 +95,13 @@ function drawDieCard(ctx, die, x, y, w, h, isKept, rollMode) {
   const syms = die.symbols;
 
   if (syms.length === 0) {
-    ctx.font = '700 22px sans-serif';
+    ctx.font = `bold 22px "${UI_FONT_FAMILY}"`;
     ctx.fillStyle = '#4B5563';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('—', centerX, centerY - 4);
 
-    ctx.font = '600 11px sans-serif';
+    ctx.font = `bold 11px "${UI_FONT_FAMILY}"`;
     ctx.fillStyle = '#6B7280';
     ctx.fillText('VAZIO', centerX, centerY + 18);
   } else if (syms.length === 1) {
@@ -146,7 +146,7 @@ function drawDieCard(ctx, die, x, y, w, h, isKept, rollMode) {
     ctx.fillStyle = rollMode === 'assimilated' ? '#C084FC' : rollMode === 'damage' || rollMode === 'assimilation_test' ? '#EF4444' : THEME.keptBadgeBg;
     ctx.fill();
 
-    ctx.font = '800 10px sans-serif';
+    ctx.font = `bold 10px "${UI_FONT_FAMILY}"`;
     ctx.fillStyle = '#0F172A';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -174,7 +174,7 @@ function renderRollImage(roll, authorName = 'Infectado(a)') {
   const headerH = 82;
   const footerH = 26;
 
-  const width = Math.max(540, padX * 2 + cols * cardW + (cols - 1) * gap);
+  const width = Math.max(580, padX * 2 + cols * cardW + (cols - 1) * gap);
   const height = headerH + rows * cardH + (rows - 1) * gap + footerH + 16;
 
   const canvas = createCanvas(width, height);
@@ -198,13 +198,13 @@ function renderRollImage(roll, authorName = 'Infectado(a)') {
   ctx.fill();
 
   // Cabeçalho esquerdo: Modo e Pool
-  ctx.font = '800 13px sans-serif';
+  ctx.font = `bold 13px "${UI_FONT_FAMILY}"`;
   ctx.fillStyle = modeInfo.accent;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
   ctx.fillText(modeInfo.title, padX, 18);
 
-  ctx.font = '700 20px sans-serif';
+  ctx.font = `bold 20px "${UI_FONT_FAMILY}"`;
   ctx.fillStyle = THEME.textPrimary;
   const subtitle = roll.mode === 'table'
     ? `Tabela 6×6 • Linha ${roll.row}, Coluna ${roll.col}`
@@ -232,7 +232,7 @@ function renderRollImage(roll, authorName = 'Infectado(a)') {
 
     drawCenteredGlyph(ctx, pill.key === 'A' ? 'a' : pill.key, pillX + 22, pillY + 20, 22, pill.color, '#090B0E', 2);
 
-    ctx.font = '800 19px sans-serif';
+    ctx.font = `bold 19px "${UI_FONT_FAMILY}"`;
     ctx.fillStyle = '#F9FAFB';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -265,14 +265,14 @@ function renderRollImage(roll, authorName = 'Infectado(a)') {
   });
 
   // Rodapé
-  ctx.font = '500 11px sans-serif';
+  ctx.font = `normal 11px "${UI_FONT_FAMILY}"`;
   ctx.fillStyle = '#6B7280';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   const footerText = roll.mode === 'table'
     ? `Dados da Linha: ${roll.rowSymbols} símbolos (→ ${roll.row})  |  Dados da Coluna: ${roll.colSymbols} símbolos (→ ${roll.col})`
     : `Assimilação RPG  •  Mantidos: ${roll.keptIndices.length}/${dice.length}  •  Clique nos controles abaixo para ajustar os dados mantidos`;
-  ctx.fillText(footerText, width / 2, height - 15);
+  ctx.fillText(footerText, width / 2, height - 15, width - padX * 2);
 
   return canvas.toBuffer('image/png');
 }

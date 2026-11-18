@@ -19,21 +19,21 @@ Bot de Discord criado com base nas regras oficiais e na tipografia de símbolos 
 
 ## Comandos de Mensagem
 
-Funciona tanto com **sufixo `a`** sem prefixo quanto com o prefixo configurado (padrão `!`):
+Funciona tanto com **sufixo `a` junto** (sem prefixo) quanto com o prefixo configurado (padrão `!`):
 
 | Comando | Descrição |
 | --- | --- |
-| `3d6 a` / `!3d6 a` | Rola 3 dados de Instinto (`d6`) e mantém o melhor |
-| `d12 a` / `!d12 a` | Rola 1 dado Assimilado (`d12`) |
-| `3d6 + 2d10 a` | Rola Instinto (`d6`) + Conhecimento/Prática (`d10`) |
-| `3d6 2d10 a m2` | Rola mantendo **2 dados** (Empenho / Origem) |
-| `3d6 2d10 a instinto` | Já rola como **Rolagem Assimilada** (tudo `d12`, +1 mantido) |
-| `3d10 a dano` | **Rolagem de Dano** (mantém todos; cada símbolo vale 1 de dano) |
-| `2d6+1d10+1d12 a conflito` | **Modo Assimilador/Conflito** (mantém todos os dados) |
-| `assimilacao 3 a` | **Teste de Assimilação** (`1 + 2×Nível` em `d12`, com alerta de 10 Pressões) |
-| `tabela a` / `tabela 12 a` | Sorteia coordenada `Linha × Coluna` para tabelas `6×6` (pág. 277) |
-| `3d6 1d10 a #Percepção` | Adiciona rótulo descritivo à rolagem |
-| `ajuda a` / `!ajuda` | Abre o guia interativo com abas (Comandos, Ícones e Regras) |
+| `3d6a` / `!3d6a` | Rola 3 dados de Instinto (`d6`) e mantém o melhor |
+| `d12a` / `!d12a` | Rola 1 dado Assimilado (`d12`) |
+| `3d6+2d10a` / `3d6 + 2d10a` | Rola Instinto (`d6`) + Conhecimento/Prática (`d10`) |
+| `3d6+2d10a m2` | Rola mantendo **2 dados** (Empenho / Origem) |
+| `3d6+2d10a instinto` | Já rola como **Rolagem Assimilada** (tudo `d12`, +1 mantido) |
+| `3d10a dano` | **Rolagem de Dano** (mantém todos; cada símbolo vale 1 de dano) |
+| `2d6+1d10+1d12a conflito` | **Modo Assimilador/Conflito** (mantém todos os dados) |
+| `!assimilacao 3` | **Teste de Assimilação** (`1 + 2×Nível` em `d12`, com alerta de 10 Pressões) |
+| `!tabela` / `!tabela 12` | Sorteia coordenada `Linha × Coluna` para tabelas `6×6` (pág. 277) |
+| `3d6+1d10a #Percepção` | Adiciona rótulo descritivo à rolagem |
+| `!ajuda` | Abre o guia interativo com abas (Comandos, Ícones e Regras) |
 
 ## Configuração e Execução
 

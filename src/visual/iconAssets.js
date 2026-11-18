@@ -3,8 +3,11 @@ const path = require('path');
 const { createCanvas, GlobalFonts } = require('@napi-rs/canvas');
 
 const FONT_PATH = path.resolve(__dirname, '../../assets/fonts/simbolos_assimilas.ttf');
+const UI_FONT_REGULAR_PATH = path.resolve(__dirname, '../../assets/fonts/DejaVuSans.ttf');
+const UI_FONT_BOLD_PATH = path.resolve(__dirname, '../../assets/fonts/DejaVuSans-Bold.ttf');
 const ICONS_DIR = path.resolve(__dirname, '../../assets/icons');
 const FONT_FAMILY = 'SimbolosAssimilacao';
+const UI_FONT_FAMILY = 'AssimilacaoUI';
 
 let fontLoaded = false;
 
@@ -12,6 +15,12 @@ function ensureFontRegistered() {
   if (fontLoaded) return;
   if (!fs.existsSync(FONT_PATH)) {
     throw new Error(`Fonte oficial não encontrada em: ${FONT_PATH}`);
+  }
+  if (fs.existsSync(UI_FONT_REGULAR_PATH)) {
+    GlobalFonts.registerFromPath(UI_FONT_REGULAR_PATH, UI_FONT_FAMILY);
+  }
+  if (fs.existsSync(UI_FONT_BOLD_PATH)) {
+    GlobalFonts.registerFromPath(UI_FONT_BOLD_PATH, UI_FONT_FAMILY);
   }
   GlobalFonts.registerFromPath(FONT_PATH, FONT_FAMILY);
   fontLoaded = true;
@@ -73,7 +82,7 @@ function renderIconBuffer(spec, size = 128) {
 
   if (spec.innerText) {
     ctx.save();
-    ctx.font = `800 ${Math.round(size * 0.28)}px sans-serif`;
+    ctx.font = `bold ${Math.round(size * 0.28)}px "${UI_FONT_FAMILY}"`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = spec.innerColor;
@@ -135,6 +144,7 @@ function ensureIconAssets() {
 
 module.exports = {
   FONT_FAMILY,
+  UI_FONT_FAMILY,
   ICONS_DIR,
   ICON_SPECS,
   ensureFontRegistered,
