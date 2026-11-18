@@ -157,28 +157,44 @@ function drawDieCard(ctx, die, x, y, w, h, isKept, rollMode) {
 }
 
 /**
- * Renderiza a bandeja visual completa da rolagem em PNG.
+ * Renderiza a bandeja visual completa da rolagem em PNG de alta resolução (2x HiDPI).
  */
 function renderRollImage(roll, authorName = 'Infectado(a)') {
   ensureFontRegistered();
 
   const dice = roll.dice || [];
   const keptSet = new Set(roll.keptIndices || []);
-  const cols = Math.min(5, Math.max(2, dice.length));
+
+  // Ajusta colunas conforme a quantidade de dados para evitar compressão excessiva no Discord
+  let cols = 4;
+  if (dice.length <= 4) {
+    cols = Math.max(2, dice.length);
+  } else if (dice.length <= 12) {
+    cols = 4;
+  } else if (dice.length <= 20) {
+    cols = 5;
+  } else {
+    cols = 6;
+  }
   const rows = Math.ceil(dice.length / cols);
 
-  const cardW = 148;
-  const cardH = 144;
-  const gap = 14;
-  const padX = 24;
+  const cardW = cols >= 6 ? 140 : 150;
+  const cardH = cols >= 6 ? 138 : 144;
+  const gap = 12;
+  const padX = 22;
   const headerH = 82;
   const footerH = 26;
 
   const width = Math.max(580, padX * 2 + cols * cardW + (cols - 1) * gap);
   const height = headerH + rows * cardH + (rows - 1) * gap + footerH + 16;
 
-  const canvas = createCanvas(width, height);
+  // Renderização em 2x HiDPI para manter nitidez no Desktop, Mobile e telas Retina
+  const scale = 2;
+  const canvas = createCanvas(width * scale, height * scale);
   const ctx = canvas.getContext('2d');
+  ctx.scale(scale, scale);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
 
   // Fundo principal com gradiente
   const bg = ctx.createLinearGradient(0, 0, 0, height);
