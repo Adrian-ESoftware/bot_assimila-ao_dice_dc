@@ -13,7 +13,7 @@ test('buildRollPayload gera payload Components v2 simples, sem botões nem menu 
   assert.equal(Boolean(payload.flags & MessageFlags.IsComponentsV2), true);
   assert.equal(payload.content, undefined);
   assert.equal(payload.embeds, undefined);
-  assert.equal(payload.files.length, 2);
+  assert.equal(payload.files.length, 1);
   assert.equal(payload.components.length, 1);
 
   const json = payload.components[0].toJSON();

@@ -32,15 +32,12 @@ function formatPoolWithEmojis(pool, emojiMgr) {
 }
 
 /**
- * Constrói a resposta limpa de rolagem utilizando Discord Components v2 (sem botões nem dados pré-escolhidos).
+ * Constrói a resposta minimalista de rolagem utilizando Discord Components v2 (apenas nome + imagem).
  */
 function buildRollPayload(session, emojiMgr) {
-  ensureIconAssets();
   const { authorName, roll } = session;
   const imgBuffer = renderRollImage(roll, authorName);
-
   const rollAttachment = new AttachmentBuilder(imgBuffer, { name: 'roll.png' });
-  const emblemAttachment = new AttachmentBuilder(path.join(ICONS_DIR, 'as_emblem.png'), { name: 'as_emblem.png' });
 
   const eSuc = emojiMgr.get('as_sucesso');
   const eAda = emojiMgr.get('as_adaptacao');
@@ -48,32 +45,9 @@ function buildRollPayload(session, emojiMgr) {
   const eAss = emojiMgr.get('as_assimilacao');
   const eSau = emojiMgr.get('as_saude');
 
-  const modeTitleMap = {
-    standard: 'Rolagem de Teste',
-    assimilated: 'Rolagem Assimilada',
-    damage: 'Rolagem de Dano',
-    conflict: 'Conflito / Assimilador',
-    assimilation_test: 'Teste de Assimilação',
-    table: 'Sorteio de Tabela 6×6',
-  };
-
-  const titleLine = `## ${modeTitleMap[roll.mode] || 'Rolagem — Assimilação RPG'}`;
-  const labelLine = roll.label ? `\n> *${roll.label}*` : '';
-  const poolLine = roll.mode === 'table'
-    ? `\n**Dados:** ${roll.sides === 12 ? `${emojiMgr.get('as_d12')} 2d12 (Altos)` : `${emojiMgr.get('as_d10')} 2d10`}`
-    : `\n**Pilha:** ${formatPoolWithEmojis(roll.pool, emojiMgr)}`;
-
-  const headerSection = new SectionBuilder()
-    .addTextDisplayComponents(
-      new TextDisplayBuilder().setContent(
-        `${titleLine}\n**Jogador(a):** ${authorName}${labelLine}${poolLine}`
-      )
-    )
-    .setThumbnailAccessory(
-      new ThumbnailBuilder()
-        .setURL('attachment://as_emblem.png')
-        .setDescription('Assimilação RPG')
-    );
+  const headerText = roll.label
+    ? `**${authorName}** — *${roll.label}*`
+    : `**${authorName}**`;
 
   const gallery = new MediaGalleryBuilder().addItems(
     new MediaGalleryItemBuilder()
@@ -83,10 +57,7 @@ function buildRollPayload(session, emojiMgr) {
 
   const container = new ContainerBuilder()
     .setAccentColor(resolveAccentColor(roll))
-    .addSectionComponents(headerSection)
-    .addSeparatorComponents(
-      new SeparatorBuilder().setDivider(true).setSpacing(SeparatorSpacingSize.Small)
-    )
+    .addTextDisplayComponents(new TextDisplayBuilder().setContent(headerText))
     .addMediaGalleryComponents(gallery);
 
   // Resumo curto apenas nos modos em que todos os dados são somados automaticamente
@@ -110,7 +81,7 @@ function buildRollPayload(session, emojiMgr) {
 
   return {
     components: [container],
-    files: [rollAttachment, emblemAttachment],
+    files: [rollAttachment],
     flags: MessageFlags.IsComponentsV2,
     allowedMentions: { repliedUser: false },
   };

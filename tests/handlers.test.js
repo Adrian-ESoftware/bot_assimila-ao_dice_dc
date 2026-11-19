@@ -28,7 +28,7 @@ test('Fluxo simplificado: messageHandler gera rolagem limpa sem botões e intera
   await handleMessageCreate(fakeMessage, { rollStore, emojiMgr });
   assert.ok(lastReply);
   assert.equal(Boolean(lastReply.flags & MessageFlags.IsComponentsV2), true);
-  assert.equal(lastReply.files.length, 2);
+  assert.equal(lastReply.files.length, 1);
 
   const json = lastReply.components[0].toJSON();
   assert.equal(json.components.some((c) => c.type === 1), false);
