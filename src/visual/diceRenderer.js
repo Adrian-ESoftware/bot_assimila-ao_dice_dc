@@ -44,31 +44,22 @@ function getModeAccent(roll) {
   return { accent: '#34D399', title: 'TESTE DE ASSIMILAÇÃO RPG' };
 }
 
-function drawDieCard(ctx, die, x, y, w, h, isKept, rollMode) {
+function drawDieCard(ctx, die, x, y, w, h) {
   ctx.save();
-  if (!isKept) {
-    ctx.globalAlpha = 0.52;
-  }
 
   // Fundo do card do dado
   ctx.beginPath();
   ctx.roundRect(x, y, w, h, 14);
-  ctx.fillStyle = isKept ? THEME.keptBg : THEME.unkeptBg;
+  ctx.fillStyle = THEME.keptBg;
   ctx.fill();
 
-  // Borda
-  ctx.lineWidth = isKept ? 2.5 : 1.5;
-  ctx.strokeStyle = isKept
-    ? (rollMode === 'assimilated' ? '#C084FC' : rollMode === 'damage' || rollMode === 'assimilation_test' ? '#EF4444' : THEME.keptBorder)
-    : THEME.unkeptBorder;
-  if (!isKept) {
-    ctx.setLineDash([5, 4]);
-  }
+  // Borda limpa
+  const dieMeta = THEME.diceColors[die.sides] || THEME.diceColors[6];
+  ctx.lineWidth = 1.8;
+  ctx.strokeStyle = THEME.border;
   ctx.stroke();
-  ctx.setLineDash([]);
 
   // Cabeçalho do dado: forma geométrica + D6/D10/D12 + face numérica
-  const dieMeta = THEME.diceColors[die.sides] || THEME.diceColors[6];
   drawCenteredGlyph(ctx, dieMeta.glyph, x + 22, y + 20, 18, dieMeta.color, '#090B0E', 2);
 
   ctx.font = `bold 13px "${UI_FONT_FAMILY}"`;
@@ -83,11 +74,11 @@ function drawDieCard(ctx, die, x, y, w, h, isKept, rollMode) {
   ctx.textAlign = 'right';
   ctx.fillText(`#${die.faceNumber}`, x + w - 12, y + 20);
 
-  // Índice #1, #2... no canto esquerdo inferior acima do badge
+  // Índice do dado no canto esquerdo inferior
   ctx.font = `normal 11px "${UI_FONT_FAMILY}"`;
   ctx.fillStyle = '#6B7280';
   ctx.textAlign = 'left';
-  ctx.fillText(`Dado ${die.index + 1}`, x + 12, y + h - 18);
+  ctx.fillText(`Dado ${die.index + 1}`, x + 12, y + h - 16);
 
   // Símbolos centrais da face
   const centerX = x + w / 2;
@@ -135,24 +126,6 @@ function drawDieCard(ctx, die, x, y, w, h, isKept, rollMode) {
     });
   }
 
-  // Badge de MANTIDO ou DESCARTADO
-  if (isKept) {
-    const badgeW = 66;
-    const badgeH = 18;
-    const bx = x + w - badgeW - 10;
-    const by = y + h - badgeH - 9;
-    ctx.beginPath();
-    ctx.roundRect(bx, by, badgeW, badgeH, 6);
-    ctx.fillStyle = rollMode === 'assimilated' ? '#C084FC' : rollMode === 'damage' || rollMode === 'assimilation_test' ? '#EF4444' : THEME.keptBadgeBg;
-    ctx.fill();
-
-    ctx.font = `bold 10px "${UI_FONT_FAMILY}"`;
-    ctx.fillStyle = '#0F172A';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('MANTIDO', bx + badgeW / 2, by + badgeH / 2 + 0.5);
-  }
-
   ctx.restore();
 }
 
@@ -163,7 +136,6 @@ function renderRollImage(roll, authorName = 'Infectado(a)') {
   ensureFontRegistered();
 
   const dice = roll.dice || [];
-  const keptSet = new Set(roll.keptIndices || []);
 
   // Ajusta colunas conforme a quantidade de dados para evitar compressão excessiva no Discord
   let cols = 4;
@@ -182,11 +154,11 @@ function renderRollImage(roll, authorName = 'Infectado(a)') {
   const cardH = cols >= 6 ? 138 : 144;
   const gap = 12;
   const padX = 22;
-  const headerH = 82;
-  const footerH = 26;
+  const headerH = 78;
+  const footerH = 18;
 
-  const width = Math.max(580, padX * 2 + cols * cardW + (cols - 1) * gap);
-  const height = headerH + rows * cardH + (rows - 1) * gap + footerH + 16;
+  const width = Math.max(520, padX * 2 + cols * cardW + (cols - 1) * gap);
+  const height = headerH + rows * cardH + (rows - 1) * gap + footerH + 8;
 
   // Renderização em 2x HiDPI para manter nitidez no Desktop, Mobile e telas Retina
   const scale = 2;
@@ -207,7 +179,7 @@ function renderRollImage(roll, authorName = 'Infectado(a)') {
 
   const modeInfo = getModeAccent(roll);
 
-  // Barra lateral / superior de destaque
+  // Barra superior de destaque
   ctx.fillStyle = modeInfo.accent;
   ctx.beginPath();
   ctx.roundRect(0, 0, width, 5, [18, 18, 0, 0]);
@@ -225,38 +197,7 @@ function renderRollImage(roll, authorName = 'Infectado(a)') {
   const subtitle = roll.mode === 'table'
     ? `Tabela 6×6 • Linha ${roll.row}, Coluna ${roll.col}`
     : `${authorName}  •  ${roll.expression}`;
-  ctx.fillText(subtitle, padX, 38, width - 290);
-
-  // Cabeçalho direito: Pílulas de totais mantidos
-  const pills = [
-    { key: 'A', val: roll.totals.A, color: THEME.symbols.A.fill, bg: '#064E3B' },
-    { key: 'B', val: roll.totals.B, color: THEME.symbols.B.fill, bg: '#0C4A6E' },
-    { key: 'C', val: roll.totals.C, color: THEME.symbols.C.fill, bg: '#450A0A' },
-  ];
-
-  let pillX = width - padX - 3 * 74 - 2 * 8;
-  const pillY = 22;
-  for (const pill of pills) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.roundRect(pillX, pillY, 74, 40, 10);
-    ctx.fillStyle = pill.bg;
-    ctx.fill();
-    ctx.lineWidth = 1.5;
-    ctx.strokeStyle = pill.color;
-    ctx.stroke();
-
-    drawCenteredGlyph(ctx, pill.key === 'A' ? 'a' : pill.key, pillX + 22, pillY + 20, 22, pill.color, '#090B0E', 2);
-
-    ctx.font = `bold 19px "${UI_FONT_FAMILY}"`;
-    ctx.fillStyle = '#F9FAFB';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(String(pill.val), pillX + 52, pillY + 21);
-    ctx.restore();
-
-    pillX += 82;
-  }
+  ctx.fillText(subtitle, padX, 38, width - padX * 2);
 
   // Linha divisória sutil
   ctx.strokeStyle = '#242933';
@@ -276,19 +217,8 @@ function renderRollImage(roll, authorName = 'Infectado(a)') {
 
     const dx = rowStartX + c * (cardW + gap);
     const dy = headerH + r * (cardH + gap);
-    const isKept = keptSet.has(die.index);
-    drawDieCard(ctx, die, dx, dy, cardW, cardH, isKept, roll.mode);
+    drawDieCard(ctx, die, dx, dy, cardW, cardH);
   });
-
-  // Rodapé
-  ctx.font = `normal 11px "${UI_FONT_FAMILY}"`;
-  ctx.fillStyle = '#6B7280';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  const footerText = roll.mode === 'table'
-    ? `Dados da Linha: ${roll.rowSymbols} símbolos (→ ${roll.row})  |  Dados da Coluna: ${roll.colSymbols} símbolos (→ ${roll.col})`
-    : `Assimilação RPG  •  Mantidos: ${roll.keptIndices.length}/${dice.length}  •  Clique nos controles abaixo para ajustar os dados mantidos`;
-  ctx.fillText(footerText, width / 2, height - 15, width - padX * 2);
 
   return canvas.toBuffer('image/png');
 }
